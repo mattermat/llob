@@ -42,30 +42,30 @@ void plain_update(struct Plain *book, char side, f64 price, f64 quantity)
         if (quantity == 0.0)  /* case 1.1: quantity = 0 */
         {
             /* step 1: put quantity to 0 in the related price level */
-            book->asks[price_level] = 0.0; // TODO: check
+            book->asks[price_level] = 0.0;
             /* step 2: if the related price level is the best ask, update the new best ask */
             if (price_level == book->ask) book->ask = search_level_up(book->asks, book->ask);
         } else                /* case 1.2: quantity != 0 */
         {
             /* step 1: update quantity in the related price level */
-            book->asks[price_level] = quantity; // TODO: check
+            book->asks[price_level] = quantity;
             /* step 2: if the related price level is below the best ask, update the new best ask */
-            if (book->ask > price_level) book->ask = price_level; // TODO: check
+            if (book->ask > price_level) book->ask = price_level;
         }
 
     } else {                  /* case 2: side is bid */
         if (quantity == 0.0)  /* case 2.1: quantity = 0 */
         {
             /* step 1: put quantity to 0 in the related price level */
-            book->bids[price_level] = 0.0; // TODO: check
+            book->bids[price_level] = 0.0;
             /* step 2: if the related price level is the best bid, update the new best bid */
             if (price_level == book->bid) book->bid = search_level_down(book->bids, book->bid);
         } else               /* case 2.2: quantity != 0 */
         {
             /* step 1: update quantity in the related price level */
-            book->bids[price_level] = quantity; // TODO: check
+            book->bids[price_level] = quantity;
             /* step 2: if the related price level is below the best bid, update the new best bid */
-            if (book->bid < price_level) book->bid = price_level; // TODO: check
+            if (book->bid < price_level) book->bid = price_level;
         }
     }
 }
