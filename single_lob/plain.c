@@ -1,9 +1,6 @@
 #include <string.h>
 #include "plain.h"
 
-// for debugging
-#include <stdio.h>
-
 void plain_init(struct Plain *book)
 {
     memset(book, 0, sizeof(struct Plain));
@@ -15,6 +12,7 @@ static inline u64 search_level_up(f64 levels[], u64 starting_level)
     /* scan the book upward to find the next populated level */
     /* used to find the next ask price starting from the input pointer */
     u64 index = starting_level;
+    // TODO: check for overflow
     while (1)
     {
         index += BOOK_INCREMENT;
@@ -27,6 +25,7 @@ static inline u64 search_level_down(f64 levels[], u64 starting_level)
     /* scan the book downward to find the next populated level */
     /* used to find the next bid price starting from the input pointer */
     u64 index = starting_level;
+    // TODO: check for overflow
     while (1)
     {
         index -= BOOK_INCREMENT;
