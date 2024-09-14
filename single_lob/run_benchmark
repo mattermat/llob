@@ -1,0 +1,19 @@
+#!/usr/bin/bash
+
+rm -rf main main.o plain.o fast.o
+
+# run gcc command and exit on error
+run_gcc() {
+    if ! gcc "$@"; then
+        echo "Error in command: gcc $@" >&2
+        exit 1
+    fi
+}
+
+run_gcc -o main.o -c main.c -g -std=gnu11 -march=native -O3
+run_gcc -o plain.o -c plain.c -g -std=gnu11 -march=native -O3
+run_gcc -o fast.o -c fast.c -g -std=gnu11 -march=native -O3
+run_gcc -o fastnsq.o -c fastnsq.c -g -std=gnu11 -march=native -O3
+run_gcc fastnsq.o plain.o fast.o main.o -o main -g -std=gnu11 -march=native -O3
+
+./main
