@@ -1,5 +1,6 @@
 #include <string.h>
 #include "plain.h"
+#include "config.h"
 
 void plain_init(struct Plain *book)
 {
@@ -15,7 +16,7 @@ static inline u64 search_level_up(f64 levels[], u64 starting_level)
     // TODO: check for overflow
     while (1)
     {
-        index += BOOK_INCREMENT;
+        index += STEP_SIZE;
         if (levels[index] > 0.0) return index;
     }
 }
@@ -28,7 +29,7 @@ static inline u64 search_level_down(f64 levels[], u64 starting_level)
     // TODO: check for overflow
     while (1)
     {
-        index -= BOOK_INCREMENT;
+        index -= STEP_SIZE;
         if (levels[index] > 0.0) return index;
     }
 }

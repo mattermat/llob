@@ -4,9 +4,11 @@
 
 #include "plain.h"
 #include "fast.h"
+#include "fastnsq.h"
 
 struct Plain plain_book;
 struct Fast fast_book;
+struct Fast_nsq fastnsq_book;
 
 /* helper function to compare floating point numbers */
 int f64_is_equal(f64 a, f64 b)
@@ -59,7 +61,7 @@ int main()
         plain_get_quantity_at_price(&plain_book, 'b', 99.0)
     ));
 
-    // TODO: remove ask (set quantity to 0)
+    // Test 5: remove ask (set quantity to 0)
     plain_update(&plain_book, 'a', 101.00, 0.0);
     assert(f64_is_equal(plain_get_quantity_at_price(&plain_book, 'a', 101.00), 0.0));
     assert(f64_is_equal(plain_get_ask_price(&plain_book), 102.0));
@@ -112,9 +114,7 @@ int main()
 
     // Test 4: Remove a bid (set quantity to 0)
     fast_update(&fast_book, 'b', 100.0, 0.0);
-    printf("before: %f\n", fast_get_bid_price(&fast_book));
     assert(f64_is_equal(fast_get_quantity_at_price(&fast_book, 100.0), 0.0));
-    printf("after : %f\n", fast_get_bid_price(&fast_book));
     assert(fast_get_side_at_price(&fast_book, 100.0) == '0');
     assert(f64_is_equal(fast_get_bid_price(&fast_book), 99.0));
     assert(fast_get_side_at_price(&fast_book, 99.0) == 'b');
@@ -123,7 +123,7 @@ int main()
         fast_get_quantity_at_price(&fast_book, 99.0)
     ));
 
-    // TODO: remove ask (set quantity to 0)
+    // Test 5: remove ask (set quantity to 0)
     fast_update(&fast_book, 'a', 101.00, 0.0);
     assert(f64_is_equal(fast_get_quantity_at_price(&fast_book, 101.00), 0.0));
     assert(fast_get_side_at_price(&fast_book, 101.0) == '0');
@@ -139,6 +139,70 @@ int main()
     fast_update(&fast_book, 'a', 100.75, 3.0);
     assert(f64_is_equal(fast_get_bid_price(&fast_book), 100.5));
     assert(f64_is_equal(fast_get_ask_price(&fast_book), 100.75));
+
+    /* Test Fast_nsq*/
+    fastnsq_init(&fastnsq_book);
+
+    // Test 1: Add a bid
+    fastnsq_update(&fastnsq_book, 'b', 100.0, 10.0);
+    assert(f64_is_equal(fastnsq_get_bid_price(&fastnsq_book), 100.0));
+    assert(f64_is_equal(fastnsq_get_quantity_at_price(&fastnsq_book, 100.0), 10.0));
+    assert(fastnsq_get_side_at_price(&fastnsq_book, 100.0) == 'b');
+    assert(f64_is_equal(
+        fastnsq_get_bid_quantity(&fastnsq_book),
+        fastnsq_get_quantity_at_price(&fastnsq_book, 100.0)
+    ));
+
+    // Test 2: Add an ask
+    fastnsq_update(&fastnsq_book, 'a', 101.0, 5.0);
+    assert(f64_is_equal(fastnsq_get_ask_price(&fastnsq_book), 101.0));
+    assert(f64_is_equal(fastnsq_get_quantity_at_price(&fastnsq_book, 101.0), 5.0));
+    assert(fastnsq_get_side_at_price(&fastnsq_book, 101.0) == 'a');
+    assert(f64_is_equal(
+        fastnsq_get_ask_quantity(&fastnsq_book),
+        fastnsq_get_quantity_at_price(&fastnsq_book, 101.0)
+    ));
+
+    // Test 3: Update existing bid
+    fastnsq_update(&fastnsq_book, 'b', 100.0, 15.0);
+    assert(f64_is_equal(fastnsq_get_quantity_at_price(&fastnsq_book, 100.0), 15.0));
+    assert(fastnsq_get_side_at_price(&fastnsq_book, 100.0));
+
+    // Test 5: Add multiple levels
+    fastnsq_update(&fastnsq_book, 'b', 99.0, 20.0);
+    fastnsq_update(&fastnsq_book, 'b', 98.0, 30.0);
+    fastnsq_update(&fastnsq_book, 'a', 102.0, 15.0);
+    fastnsq_update(&fastnsq_book, 'a', 103.0, 25.0);
+    assert(f64_is_equal(fastnsq_get_bid_price(&fastnsq_book), 100.0));
+    assert(f64_is_equal(fastnsq_get_ask_price(&fastnsq_book), 101.0));
+
+    // Test 4: Remove a bid (set quantity to 0)
+    fastnsq_update(&fastnsq_book, 'b', 100.0, 0.0);
+    assert(f64_is_equal(fastnsq_get_quantity_at_price(&fastnsq_book, 100.0), 0.0));
+    assert(fastnsq_get_side_at_price(&fastnsq_book, 100.0) == '0');
+    assert(f64_is_equal(fastnsq_get_bid_price(&fastnsq_book), 99.0));
+    assert(fastnsq_get_side_at_price(&fastnsq_book, 99.0) == 'b');
+    assert(f64_is_equal(
+        fastnsq_get_bid_quantity(&fastnsq_book),
+        fastnsq_get_quantity_at_price(&fastnsq_book, 99.0)
+    ));
+
+    // Test 5: remove ask (set quantity to 0)
+    fastnsq_update(&fastnsq_book, 'a', 101.00, 0.0);
+    assert(f64_is_equal(fastnsq_get_quantity_at_price(&fastnsq_book, 101.00), 0.0));
+    assert(fastnsq_get_side_at_price(&fastnsq_book, 101.0) == '0');
+    assert(f64_is_equal(fastnsq_get_ask_price(&fastnsq_book), 102.0));
+    assert(fastnsq_get_side_at_price(&fastnsq_book, 102.0) == 'a');
+    assert(f64_is_equal(
+        fastnsq_get_ask_quantity(&fastnsq_book),
+        fastnsq_get_quantity_at_price(&fastnsq_book, 102.0)
+    ));
+
+    // Test 6: Update best bid/ask
+    fastnsq_update(&fastnsq_book, 'b', 100.5, 5.0);
+    fastnsq_update(&fastnsq_book, 'a', 100.75, 3.0);
+    assert(f64_is_equal(fastnsq_get_bid_price(&fastnsq_book), 100.5));
+    assert(f64_is_equal(fastnsq_get_ask_price(&fastnsq_book), 100.75));
 
     printf("All tests passed!\n");
 

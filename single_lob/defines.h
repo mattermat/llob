@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 
 #define i8  int8_t
